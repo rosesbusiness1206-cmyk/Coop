@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toronto Co-op Comparison — CoopRank</title>
+<meta name="description" content="Non-profit housing co-operatives in Toronto and the GTA, ranked by number of homes, with nearest subway station, year built and contact details.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --surface:#f5f7f9; --raise:#ffffff; --ink:#12161c; --ink-2:#5b6672;
+  --rule:#e3e7ec; --rule-2:#eff2f5; --link:#0b57bf; --link-soft:#eaf1fd;
+  --l1:#f2c500; --l2:#009a45; --l3:#7a99ad; --l4:#a21a68; --l5:#e6761a;
+  --ok:#0f7a4b; --shadow:0 1px 2px rgba(16,24,32,.06),0 8px 24px rgba(16,24,32,.06);
+  --w:1180px;
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1216; --surface:#151b21; --raise:#171e25; --ink:#e8edf2; --ink-2:#95a2b0;
+    --rule:#242d36; --rule-2:#1b232a; --link:#6fa8ff; --link-soft:#16273f;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1216; --surface:#151b21; --raise:#171e25; --ink:#e8edf2; --ink-2:#95a2b0;
+  --rule:#242d36; --rule-2:#1b232a; --link:#6fa8ff; --link-soft:#16273f;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+img,picture,figure{display:none!important}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+h1,h2,h3,.brand,.num{font-family:Archivo,"Public Sans",Helvetica,Arial,sans-serif}
+h1{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
+h2{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:36px 0 10px}
+h3{font-size:16px;font-weight:600;margin:24px 0 6px}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:3px}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 18px}
+
+/* ---------- header ---------- */
+header.site{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--rule)}
+.bar{display:flex;align-items:center;gap:18px;height:58px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:17px;color:var(--ink);letter-spacing:-.02em}
+.brand:hover{text-decoration:none}
+.mark{width:26px;height:26px;border-radius:5px;background:var(--ink);position:relative;flex:none}
+.mark::before,.mark::after{content:"";position:absolute;left:5px;right:5px;height:3px;border-radius:2px}
+.mark::before{top:7px;background:var(--l1)}
+.mark::after{top:14px;background:var(--l2)}
+nav.main{display:flex;gap:2px;margin-left:auto;align-items:center}
+nav.main a{padding:7px 11px;border-radius:7px;color:var(--ink-2);font-weight:500;font-size:14px}
+nav.main a:hover{background:var(--surface);text-decoration:none;color:var(--ink)}
+nav.main a[aria-current="page"]{color:var(--ink);background:var(--surface)}
+.iconbtn{border:1px solid var(--rule);background:var(--raise);color:var(--ink-2);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:14px;display:grid;place-items:center}
+.iconbtn:hover{color:var(--ink)}
+
+/* ---------- page head ---------- */
+.pagehead{padding:26px 0 0}
+.tally{color:var(--ink-2);font-size:14px;margin:0 0 18px}
+.tally b{color:var(--ink);font-weight:600}
+
+/* ---------- rank pills ---------- */
+.rankby{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 0 14px;border-bottom:1px solid var(--rule-2)}
+.rankby .lbl{font-size:13px;color:var(--ink-2);margin-right:4px}
+.pill{border:1px solid transparent;background:none;color:var(--link);font:inherit;font-size:13.5px;padding:5px 10px;border-radius:999px;cursor:pointer}
+.pill:hover{background:var(--link-soft)}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ---------- filters ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0}
+.field{position:relative;flex:1 1 260px;min-width:0}
+.field input,.field select{
+  width:100%;height:38px;padding:0 12px;border:1px solid var(--rule);border-radius:9px;
+  background:var(--raise);color:var(--ink);font:inherit;font-size:14px
+}
+.field select{cursor:pointer}
+.linefilter{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lchip{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 11px;border:1px solid var(--rule);border-radius:9px;background:var(--raise);color:var(--ink-2);cursor:pointer;font:inherit;font-size:13.5px}
+.lchip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+
+/* ---------- table ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:var(--raise)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule-2);white-space:nowrap}
+thead th{
+  position:static;background:var(--raise);z-index:auto;font-size:12.5px;font-weight:600;color:var(--ink-2);
+  border-bottom:1px solid var(--rule);cursor:pointer;user-select:none
+}
+thead th.nosort{cursor:default}
+thead th span.arrow{opacity:.35;margin-left:4px;font-size:10px}
+thead th[aria-sort] span.arrow{opacity:1;color:var(--ink)}
+tbody tr:hover{background:var(--surface)}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.rank{color:var(--ink-2);width:44px;font-size:13.5px}
+td.star{width:34px;padding-right:0}
+.starbtn{background:none;border:none;cursor:pointer;color:var(--rule);font-size:15px;padding:2px;line-height:1}
+.starbtn[aria-pressed="true"]{color:var(--l1)}
+.starbtn:hover{color:var(--ink-2)}
+.coopcell{display:flex;align-items:center;gap:11px;white-space:normal}
+.badge{
+  width:34px;height:34px;flex:none;border-radius:8px;display:grid;place-items:center;
+  font-family:Archivo;font-weight:700;font-size:14px;color:#fff;letter-spacing:-.02em
+}
+.coopcell .nm{font-weight:500;color:var(--ink)}
+.coopcell .sub{display:block;font-size:12.5px;color:var(--ink-2);font-weight:400}
+.lines{display:flex;gap:4px}
+.lnum{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:700;color:#1a1a1a;font-family:Archivo}
+.bar{height:5px;border-radius:3px;background:var(--rule-2);position:relative;width:88px;margin-top:5px;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--ink-2);border-radius:3px}
+.empty{padding:40px 16px;text-align:center;color:var(--ink-2)}
+
+/* ---------- detail ---------- */
+.back{font-size:14px;color:var(--ink-2);display:inline-block;margin:22px 0 12px}
+.detailhead{display:flex;gap:16px;align-items:flex-start;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.detailhead .badge{width:52px;height:52px;border-radius:11px;font-size:18px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin:22px 0}
+.stat{background:var(--raise);padding:14px 16px}
+.stat .k{font-size:12.5px;color:var(--ink-2)}
+.stat .v{font-family:Archivo;font-weight:600;font-size:22px;letter-spacing:-.01em;margin-top:2px}
+.stat .v small{font-size:13px;font-weight:500;color:var(--ink-2);font-family:"Public Sans"}
+dl.facts{margin:0;border-top:1px solid var(--rule-2)}
+dl.facts div{display:flex;gap:16px;padding:11px 2px;border-bottom:1px solid var(--rule-2);align-items:baseline}
+dl.facts dt{flex:0 0 190px;color:var(--ink-2);font-size:14px;margin:0}
+dl.facts dd{margin:0;flex:1;min-width:0;overflow-wrap:anywhere}
+.nearby{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.nearby a{border:1px solid var(--rule);border-radius:999px;padding:5px 12px;font-size:13.5px;background:var(--raise)}
+.nearby a:hover{text-decoration:none;border-color:var(--ink)}
+
+/* ---------- prose / about / faq ---------- */
+.prose{max-width:72ch;padding-bottom:8px}
+.prose p{margin:0 0 14px}
+.prose ul{margin:0 0 14px;padding-left:20px}
+.prose li{margin-bottom:6px}
+.note{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--l1);border-radius:10px;padding:14px 16px;margin:18px 0;font-size:14.5px}
+table.method{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;min-width:0}
+table.method th,table.method td{white-space:normal;padding:10px 12px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+table.method thead th{position:static;cursor:default;background:none}
+.tag{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2);white-space:nowrap}
+.tag.live{color:var(--ok);border-color:currentColor}
+details.faq{border-bottom:1px solid var(--rule-2);padding:4px 0}
+details.faq summary{cursor:pointer;padding:13px 28px 13px 2px;font-weight:600;font-size:15.5px;list-style:none;position:relative}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"+";position:absolute;right:6px;top:11px;font-size:19px;color:var(--ink-2);font-weight:400}
+details.faq[open] summary::after{content:"–"}
+details.faq .body{padding:0 2px 16px;max-width:72ch;color:var(--ink);font-size:14.5px}
+details.faq .body p{margin:0 0 10px}
+
+/* ---------- footer ---------- */
+footer.site{margin-top:54px;border-top:1px solid var(--rule);background:var(--surface)}
+.fcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:26px;padding:30px 0 24px}
+footer h4{font-family:Archivo;font-size:13px;font-weight:600;margin:0 0 8px}
+footer ul{list-style:none;margin:0;padding:0;font-size:14px}
+footer li{margin-bottom:5px}
+footer p{color:var(--ink-2);font-size:13px;max-width:60ch}
+.legal{border-top:1px solid var(--rule);padding:14px 0;font-size:12.5px;color:var(--ink-2)}
+
+@media (max-width:760px){
+  h1{font-size:25px}
+  .bar{height:54px;gap:10px}
+  nav.main a{padding:7px 8px;font-size:13.5px}
+  .hide-sm{display:none}
+  dl.facts div{flex-direction:column;gap:2px}
+  dl.facts dt{flex:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="#/"><span class="mark" aria-hidden="true"></span>CoopRank</a>
+    <nav class="main">
+      <a href="#/" data-route="home">Rankings</a>
+      <a href="#/shortlist" data-route="shortlist">Shortlist</a>
+      <a href="#/about" data-route="about">About</a>
+      <a href="#/faq" data-route="faq">FAQ</a>
+      <button class="iconbtn" id="theme" title="Switch between light and dark" aria-label="Switch between light and dark">◐</button>
+    </nav>
+  </div>
+</header>
+
+<main id="app" class="wrap"></main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="fcols">
+      <div>
+        <h4>CoopRank</h4>
+        <p>A directory of non-profit housing co-operatives in Toronto and the surrounding region, ranked by the number of homes each one holds.</p>
+      </div>
+      <div>
+        <h4>Browse</h4>
+        <ul>
+          <li><a href="#/">All co-ops</a></li>
+          <li><a href="#/?sort=year&dir=desc">Newest buildings</a></li>
+          <li><a href="#/?sort=year&dir=asc">Oldest buildings</a></li>
+          <li><a href="#/shortlist">Your shortlist</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Read</h4>
+        <ul>
+          <li><a href="#/about">About the data</a></li>
+          <li><a href="#/faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Corrections</h4>
+        <ul><li><a href="#/faq">Report wrong details</a></li></ul>
+      </div>
+    </div>
+    <div class="legal">Listings are compiled from public sources and may be out of date. CoopRank is not affiliated with any co-operative listed here and does not manage applications or waiting lists.</div>
+  </div>
+</footer>
+
+<script>
+const DATA = [{"name":"City Park Co-op","slug":"city-park-co-op","street":"484 Church Street","muni":"Toronto","postal":"M4Y 2C7","address":"484 Church Street Toronto, ON M4Y 2C7","email":"general.manager@cpco-op.ca","units":770,"station":"Wellesley","lines":[1],"transit":"Wellesley Station Line 1 (Yonge–University).","year":1957,"yearNote":"1957"},{"name":"Neill-Wycik Co-op","slug":"neill-wycik-co-op","street":"96 Gerrard Street East","muni":"Toronto","postal":"M5B 1G7","address":"96 Gerrard Street East Toronto, ON M5B 1G7","email":"housing@neill-wycik.coop","units":737,"station":"Dundas","lines":[1],"transit":"Dundas Station Line 1 – Yonge–University","year":1970,"yearNote":"1970"},{"name":"Atkinson Co-op","slug":"atkinson-co-op","street":"71 Augusta Square","muni":"Toronto","postal":"M5T 2K6","address":"71 Augusta Square Toronto, ON M5T 2K6","email":"atkinsonhousingcoop@gmail.com","units":410,"station":"Osgoode","lines":[1],"transit":"Osgoode Station Line 1 – Yonge–University","year":1969,"yearNote":"1969"},{"name":"Upwood Park/Salvador Del Mundo Co-op","slug":"upwood-park-salvador-del-mundo-co-op","street":"298 Queens Drive","muni":"North York","postal":"M6L 3E2","address":"298 Queens Drive North York, ON M6L 3E2","email":"upwoodscoop@rogers.com","units":318,"station":"Lawrence West","lines":[1],"transit":"Lawrence West Station Line 1 – Yonge–University","year":1992,"yearNote":"1992"},{"name":"Campus Co-op","slug":"campus-co-op","street":"395 Huron Street","muni":"Toronto","postal":"M5S 2G5","address":"395 Huron Street Toronto, ON M5S 2G5","email":"enquiries@campus.coop","units":310,"station":"St. George","lines":[1,2],"transit":"St. George Station Lines 1 & 2","year":1890,"yearNote":"1890"},{"name":"Bain Co-op","slug":"bain-co-op","street":"100 Bain Avenue","muni":"Toronto","postal":"M4K 1E8","address":"100 Bain Avenue Toronto, ON M4K 1E8","email":"admin@100bain.com","units":260,"station":"Broadview","lines":[2],"transit":"Broadview Station Line 2 Bloor–Danforth","year":1914,"yearNote":"1914"},{"name":"Diane Frankling Co-op","slug":"diane-frankling-co-op","street":"85 Bleecker Street","muni":"Toronto","postal":"M4X 1X1","address":"85 Bleecker Street Toronto, ON M4X 1X1","email":"rhayward@dianefranklingco-op.com","units":254,"station":"Sherbourne","lines":[1,2],"transit":"Sherbourne Station Line 1 and 2","year":1991,"yearNote":"1991"},{"name":"Duncan Mills Co-op","slug":"duncan-mills-co-op","street":"2040 Don Mills Road","muni":"North York","postal":"M3A 3R7","address":"2040 Don Mills Road North York, ON M3A 3R7","email":"sean@2040donmills.com","units":221,"station":"Don Mills","lines":[4],"transit":"Don Mills Station Line 4 (Sheppard)","year":1992,"yearNote":"1992"},{"name":"Windmill Line Co-op","slug":"windmill-line-co-op","street":"125 Scadding Avenue","muni":"Toronto","postal":"M5A 4H8","address":"125 Scadding Avenue Toronto, ON M5A 4H8","email":"applications@windmill-line.coop","units":206,"station":"King","lines":[1],"transit":"King Station Line 1 – Yonge–University","year":1982,"yearNote":"1982"},{"name":"Woodsworth Co-op","slug":"woodsworth-co-op","street":"133 Wilton Street","muni":"Toronto","postal":"M5A 4A4","address":"133 Wilton Street Toronto, ON M5A 4A4","email":"woodsworthadmin@rogers.com","units":194,"station":"King","lines":[1],"transit":"King Station Line 1","year":1979,"yearNote":"1979"},{"name":"David B Archer Co-op","slug":"david-b-archer-co-op","street":"158 The Esplanade","muni":"Toronto","postal":"M5A 3T2","address":"158 The Esplanade Toronto, ON M5A 3T2","email":"darchercoop@rogers.com","units":190,"station":"King","lines":[1],"transit":"King Station Line 1","year":1979,"yearNote":"1979"},{"name":"Woburn Village Co-op","slug":"woburn-village-co-op","street":"255 Dolly Varden Boulevard","muni":"Scarborough","postal":"M1H 2K8","address":"255 Dolly Varden Boulevard Scarborough, ON M1H 2K8","email":"woburnvillage@gmail.com","units":185,"station":"Kennedy","lines":[2],"transit":"Kennedy Station Line 2","year":1980,"yearNote":"1980"},{"name":"Hugh Garner Co-op","slug":"hugh-garner-co-op","street":"550 Ontario Street","muni":"Toronto","postal":"M4X 1X3","address":"550 Ontario Street Toronto, ON M4X 1X3","email":"office@hughgarner.com","units":181,"station":"Sherbourne","lines":[2],"transit":"Sherbourne Station Line 2","year":1981,"yearNote":"1981"},{"name":"Peregrine Co-op","slug":"peregrine-co-op","street":"18 Grenville Street","muni":"Toronto","postal":"M4Y 3B3","address":"18 Grenville Street Toronto, ON M4Y 3B3","email":"office@peregrinecoop.ca","units":174,"station":"Wellesley","lines":[1],"transit":"Wellesley Station Line 1","year":1997,"yearNote":"1997"},{"name":"Mimico Co-op","slug":"mimico-co-op","street":"1 Summerhill Road","muni":"Etobicoke","postal":"M8V 1R9","address":"1 Summerhill Road Etobicoke, ON M8V 1R9","email":"office@mimico-cooperative.org","units":172,"station":"Royal York","lines":[2],"transit":"Royal York Station Line 2 – Bloor–Danforth","year":1990,"yearNote":"1990"},{"name":"Harry Sherman Crowe Co-op","slug":"harry-sherman-crowe-co-op","street":"51 The Chimneystack Road","muni":"North York","postal":"M3J 3L9","address":"51 The Chimneystack Road North York, ON M3J 3L9","email":"harrysherman@bellnet.ca","units":164,"station":"Pioneer Village","lines":[1],"transit":"Pioneer Village Line 1","year":1987,"yearNote":"1987"},{"name":"Bridle Manor Co-op","slug":"bridle-manor-co-op","street":"3110 Sheppard Avenue East","muni":"Scarborough","postal":"M1T 3J8","address":"3110 Sheppard Avenue East Scarborough, ON M1T 3J8","email":"administration@bridlemanor.com","units":162,"station":"Leslie","lines":[4],"transit":"Leslie Station Line 4 (Sheppard)","year":1972,"yearNote":"1972"},{"name":"Ellen McGreal Co-op","slug":"ellen-mcgreal-co-op","street":"35 Sewells Road","muni":"Scarborough","postal":"M1B 4Z2","address":"35 Sewells Road Scarborough, ON M1B 4Z2","email":"office@ellenmcgrealcoop.ca","units":160,"station":"Scarborough Centre","lines":[2],"transit":"Scarborough Centre Line 2","year":1984,"yearNote":"1984"},{"name":"William Lyon Mackenzie Co-op","slug":"william-lyon-mackenzie-co-op","street":"299 Mullen Drive","muni":"Thornhill","postal":"L4J 3W3","address":"299 Mullen Drive Thornhill, ON L4J 3W3","email":"coopoffice@williamlyonmackenzie.ca","units":152,"station":"Vaughan Metropolitan Centre","lines":[1],"transit":"Vaughan Metropolitan Centre Station Line 1","year":1984,"yearNote":"1984"},{"name":"Lakeshore Gardens Co-op","slug":"lakeshore-gardens-co-op","street":"10 Garnett Janes Road","muni":"Etobicoke","postal":"M8V 3Z2","address":"10 Garnett Janes Road Etobicoke, ON M8V 3Z2","email":"lakeshore.gardens1300@gmail.com","units":151,"station":"Islington","lines":[2],"transit":"Islington Station Line 2 – Bloor–Danforth","year":1993,"yearNote":"1993"},{"name":"Robert Cooke Co-op","slug":"robert-cooke-co-op","street":"20 Garnett Janes Road","muni":"Etobicoke","postal":"M8V 3Z1","address":"20 Garnett Janes Road Etobicoke, ON M8V 3Z1","email":"robertcooke@rogers.com","units":151,"station":"Islington","lines":[2],"transit":"Islington Station Line 2 – Bloor–Danforth","year":1992,"yearNote":"1992"},{"name":"Landsberg/Lewis Co-op","slug":"landsberg-lewis-co-op","street":"46 Berwick Crescent","muni":"Richmond Hill","postal":"L4C 0C3","address":"46 Berwick Crescent Richmond Hill, ON L4C 0C3","email":"landsberglewis@rogers.com","units":149,"station":"Finch","lines":[1],"transit":"Finch Station Line 1","year":null,"yearNote":"—"},{"name":"Margaret Laurence Co-op","slug":"margaret-laurence-co-op","street":"81 Dalhousie Street","muni":"Toronto","postal":"M5B 2N1","address":"81 Dalhousie Street Toronto, ON M5B 2N1","email":"mlhcoffice@bellnet.ca","units":149,"station":"TMU","lines":[1],"transit":"TMU Station Line 1","year":2000,"yearNote":"2000"},{"name":"Oak Street Co-op","slug":"oak-street-co-op","street":"120 Cornwall Street","muni":"Toronto","postal":"M5A 4K5","address":"120 Cornwall Street Toronto, ON M5A 4K5","email":"office@oakstreet.coop","units":149,"station":"Dundas","lines":[1],"transit":"Dundas Station Line 1.","year":1985,"yearNote":"1985"},{"name":"Almise Co-op","slug":"almise-co-op","street":"16 Concorde Place","muni":"North York","postal":"M3C 3S6","address":"16 Concorde Place North York, ON M3C 3S6","email":"pioneerplace@rogers.com","units":144,"station":"Don Mills","lines":[4],"transit":"Don Mills Station on Line 4 (Sheppard)","year":1992,"yearNote":"1992"},{"name":"Marine Heights Co-op","slug":"marine-heights-co-op","street":"21 Cliffside Drive","muni":"Scarborough","postal":"M1N 1K9","address":"21 Cliffside Drive Scarborough, ON M1N 1K9","email":"marineheightscoop@bellnet.ca","units":144,"station":"Victoria Park","lines":[2],"transit":"Victoria Park Station Line 2","year":1955,"yearNote":"1950s"},{"name":"New Hibret Co-operative Homes","slug":"new-hibret-co-operative-homes","street":"2 Market Street","muni":"Toronto","postal":"M5E 1Y9","address":"2 Market Street Toronto M5E 1Y9","email":"newhibretco-op@rogers.com","units":141,"station":"King","lines":[1],"transit":"King Station Line 1","year":1997,"yearNote":"1997"},{"name":"William Peak Co-op","slug":"william-peak-co-op","street":"1990 Whites Road","muni":"Pickering","postal":"L1V 6P5","address":"1990 Whites Road Pickering, ON L1V 6P5","email":"williampeakboard@gmail.com","units":141,"station":"Kennedy","lines":[2],"transit":"Kennedy Station Line 2","year":1991,"yearNote":"1991"},{"name":"Black Creek Co-op","slug":"black-creek-co-op","street":"1779 Jane Street","muni":"North York","postal":"M9N 3V7","address":"1779 Jane Street North York, ON M9N 3V7","email":"blackcreek@rogers.com","units":140,"station":"Mount Dennis","lines":[5],"transit":"Mount Dennis Line 5 (Eglinton","year":1987,"yearNote":"1987"},{"name":"Humberview Co-op","slug":"humberview-co-op","street":"2100","muni":"Weston","postal":"M9N 3W6","address":"2100 Weston Road Weston, ON M9N 3W6","email":"humber1@rogers.com","units":140,"station":"Old Mill","lines":[2],"transit":"Old Mill Station Line 2","year":1991,"yearNote":"1991"},{"name":"Chord Co-op","slug":"chord-co-op","street":"43 Goldwin Avenue","muni":"York","postal":"M6M 5H4","address":"43 Goldwin Avenue York, ON M6M 5H4","email":"office@chordcoop.ca","units":136,"station":"Jane","lines":[2],"transit":"Jane Station Line 2 (Bloor–Danforth)","year":1994,"yearNote":"1994"},{"name":"Eamon Park Co-op","slug":"eamon-park-co-op","street":"94 David Lewis Drive","muni":"Concord","postal":"L4K 3J1","address":"94 David Lewis Drive Concord, ON L4K 3J1","email":"office@eamonparkcoop.ca","units":136,"station":"Don Mills","lines":[4],"transit":"Don Mills Station Line 4 – Sheppard","year":1993,"yearNote":"1993"},{"name":"Ann Marie Hill Co-op","slug":"ann-marie-hill-co-op","street":"170 Galloway Road","muni":"Scarborough","postal":"M1E 5A5","address":"170 Galloway Road Scarborough, ON M1E 5A5","email":"annmariehill@rogers.com","units":135,"station":"Kennedy","lines":[2],"transit":"Kennedy Station Line 2 Bloor-Danforth subway","year":1983,"yearNote":"1983"},{"name":"Barsa Kelly/Cari-Can Co-op","slug":"barsa-kelly-cari-can-co-op","street":"1 Coin Street","muni":"Etobicoke","postal":"M8V 3Y9","address":"1 Coin Street Etobicoke, ON M8V 3Y9","email":"bkcccan@bkcc.ca","units":133,"station":"Islington","lines":[2],"transit":"Islington Station Line 2 Bloor–Danforth","year":1900,"yearNote":"1900"},{"name":"Ascot Co-op","slug":"ascot-co-op","street":"930 Queen's Plate Drive","muni":"Etobicoke","postal":"M9W 6Z5","address":"930 Queen's Plate Drive Etobicoke, ON M9W 6Z5","email":"ascot@rogers.com","units":132,"station":"Highway 407","lines":[1],"transit":"Highway 407 Station Line 1 Yonge-University","year":1999,"yearNote":"1999"},{"name":"Hospital Workers Co-op","slug":"hospital-workers-co-op","street":"100 Merton Street","muni":"Toronto","postal":"M4S 3G1","address":"100 Merton Street Toronto, ON M4S 3G1","email":"hospitalworkerscoop@bellnet.ca","units":132,"station":"Davisville","lines":[1],"transit":"Davisville Station Line 1","year":1992,"yearNote":"1992"},{"name":"Tamil Co-op","slug":"tamil-co-op","street":"20 Wade Avenue","muni":"Toronto","postal":"M6H 4H3","address":"20 Wade Avenue Toronto, ON M6H 4H3","email":"office@tamilcoop.ca","units":129,"station":"Lansdowne","lines":[2],"transit":"Lansdowne Station Line 2","year":1984,"yearNote":"1984"},{"name":"Beech Hall Co-op","slug":"beech-hall-co-op","street":"2 Humber Boulevard","muni":"Toronto","postal":"M6N 2H3","address":"2 Humber Boulevard Toronto, ON M6N 2H3","email":"info@beechhall.org","units":128,"station":"Keele","lines":[2],"transit":"Keele Station Line 2 (Bloor–Danforth)","year":1979,"yearNote":"1979"},{"name":"William Punnett Co-op","slug":"william-punnett-co-op","street":"3077 Lakeshore Shore Boulevard West","muni":"Toronto","postal":"M8V 1K7","address":"3077 Lakeshore Shore Boulevard West Toronto, ON M8V 1K7","email":"williampunnett@rogers.com","units":128,"station":"Kipling","lines":[2],"transit":"Kipling Station Line 2 – Bloor–Danforth","year":1985,"yearNote":"1985"},{"name":"Rouge Valley Co-op","slug":"rouge-valley-co-op","street":"1095 Neilson Road","muni":"Scarborough","postal":"M1B 5K5","address":"1095 Neilson Road Scarborough, ON M1B 5K5","email":"office@rougevalleycoop.ca","units":126,"station":"Kennedy","lines":[2],"transit":"Kennedy Station Line 2 – Bloor–Danforth","year":1989,"yearNote":"1989"},{"name":"Riverdale Co-op","slug":"riverdale-co-op","street":"1363 Queen Street East","muni":"Toronto","postal":"M4L 1C7","address":"1363 Queen Street East Toronto, ON M4L 1C7","email":"admin@riverdalecoop.ca","units":124,"station":"Broadview","lines":[2],"transit":"Broadview Station Line 2 – Bloor–Danforth","year":1974,"yearNote":"1974"},{"name":"Harbour Channel Co-op","slug":"harbour-channel-co-op","street":"633 Lake Shore Boulevard West","muni":"Toronto","postal":"M5V 3B9","address":"633 Lake Shore Boulevard West Toronto, ON M5V 3B9","email":"harbour.admin@bellnet.ca","units":119,"station":"Union","lines":[1],"transit":"Union Station Line 1","year":1989,"yearNote":"1989"},{"name":"Metta Co-op","slug":"metta-co-op","street":"99 Dalhousie Street","muni":"Toronto","postal":"M5B 2N2","address":"99 Dalhousie Street Toronto, ON M5B 2N2","email":"mettahc.desk@gmail.com","units":114,"station":"Dundas","lines":[1],"transit":"Dundas Station Line 1","year":1993,"yearNote":"1993"},{"name":"Kalmar Co-op","slug":"kalmar-co-op","street":"1546 Kingston Road","muni":"Scarborough","postal":"M1N 1R8","address":"1546 Kingston Road Scarborough, ON M1N 1R8","email":"kalmarco-operative@rogers.com","units":112,"station":"Victoria Park","lines":[2],"transit":"Victoria Park Station Line 2","year":1978,"yearNote":"1978"},{"name":"Marketview Co-op","slug":"marketview-co-op","street":"110 George Street South","muni":"Toronto","postal":"M5A 4P9","address":"110 George Street South Toronto, ON M5A 4P9","email":"office@marketviewcoop.com","units":112,"station":"King","lines":[1],"transit":"King Station Line 1","year":null,"yearNote":"—"},{"name":"Broadview Co-op","slug":"broadview-co-op","street":"1050 Broadview Avenue","muni":"Toronto","postal":"M4K 2S3","address":"1050 Broadview Avenue Toronto, ON M4K 2S3","email":"manager@broadviewcoop.ca","units":111,"station":"Broadview","lines":[2],"transit":"Broadview Station Line 2 (Bloor–Danforth)","year":1968,"yearNote":"1968"},{"name":"Arcadia Co-op","slug":"arcadia-co-op","street":"680 Queen's Quay West","muni":"Toronto","postal":"M5V 2Y9","address":"680 Queen's Quay West Toronto, ON M5V 2Y9","email":"arcadiahousing@rogers.com","units":110,"station":"Union","lines":[1],"transit":"Union Station Line 1 Yonge–University","year":1985,"yearNote":"1985"},{"name":"Maurice Coulter Co-op","slug":"maurice-coulter-co-op","street":"174 John Garland Boulevard","muni":"Etobicoke","postal":"M9V 5G1","address":"174 John Garland Boulevard Etobicoke, ON M9V 5G1","email":"mchc@rogers.com","units":110,"station":"Kipling","lines":[2],"transit":"Kipling Station Line 2 – Bloor–Danforth","year":1989,"yearNote":"1989"},{"name":"Muriel Collins Co-op","slug":"muriel-collins-co-op","street":"79 Richmond Street East","muni":"Toronto","postal":"M5C 3A6","address":"79 Richmond Street East Toronto, ON M5C 3A6","email":"info@murielcollins.com","units":108,"station":"King","lines":[1],"transit":"King Station Line 1","year":1995,"yearNote":"1995"},{"name":"Scarborough Heights Co-op","slug":"scarborough-heights-co-op","street":"90 Burrows Hall Boulevard","muni":"Scarborough","postal":"M1B 5M2","address":"90 Burrows Hall Boulevard Scarborough, ON M1B 5M2","email":"scarboroheightscoop@rogers.com","units":108,"station":"Kennedy","lines":[2],"transit":"Kennedy Station Line 2 (Bloor–Danforth)","year":1989,"yearNote":"1989"},{"name":"Charles Darrow Co-op","slug":"charles-darrow-co-op","street":"135 James Henry Drive","muni":"Aurora","postal":"L4G 6E7","address":"135 James Henry Drive Aurora, ON L4G 6E7","email":"charlesdarrowcoop@rogers.com","units":107,"station":"Vaughan Metropolitan Centre","lines":[1],"transit":"Vaughan Metropolitan Centre Line 1 (Yonge–University)","year":1986,"yearNote":"1986"},{"name":"Jarvis-George Co-op","slug":"jarvis-george-co-op","street":"279 Jarvis Street","muni":"Toronto","postal":"M5B 2P2","address":"279 Jarvis Street Toronto, ON M5B 2P2","email":"jarvisgeorge1994@gmail.com","units":107,"station":"Dundas","lines":[1],"transit":"Dundas Station Line 1","year":1994,"yearNote":"1994"},{"name":"Nakiska Co-op","slug":"nakiska-co-op","street":"3078 Lake Shore Boulevard West","muni":"Etobicoke","postal":"M8V 3Y7","address":"3078 Lake Shore Boulevard West Etobicoke, ON M8V 3Y7","email":"nakiskarules@rogers.com","units":107,"station":"Kipling","lines":[2],"transit":"Kipling Station Line 2","year":null,"yearNote":"—"},{"name":"Taylor Creek Co-op","slug":"taylor-creek-co-op","street":"194 Rexleigh Drive","muni":"East York","postal":"M4B 2N6","address":"194 Rexleigh Drive East York, ON M4B 2N6","email":"taylorcreek@rogers.com","units":107,"station":"Victoria Park","lines":[2],"transit":"Victoria Park Station Line 2 – Bloor–Danforth","year":1965,"yearNote":"1965"},{"name":"Forty-Third Co-op","slug":"forty-third-co-op","street":"15 43rd Street","muni":"Etobicoke","postal":"M8W 3P7","address":"15 43rd Street Etobicoke, ON M8W 3P7","email":"43rdcoop@gmail.com","units":106,"station":"Kipling","lines":[2],"transit":"Kipling Line 2.","year":null,"yearNote":"—"},{"name":"Richmond Hill Co-op","slug":"richmond-hill-co-op","street":"8675 Bayview Avenue","muni":"Richmond Hill","postal":"L4B 3M5","address":"8675 Bayview Avenue Richmond Hill, ON L4B 3M5","email":"richmondhillco-op@rogers.com","units":105,"station":"Bayview","lines":[4],"transit":"Bayview Station Line 4 – Sheppard","year":1990,"yearNote":"1990"},{"name":"Rougemount Co-op","slug":"rougemount-co-op","street":"400 Kingston Road","muni":"Pickering","postal":"L1V 6S1","address":"400 Kingston Road Pickering, ON L1V 6S1","email":"info@rougemountco-op.ca","units":105,"station":"Kennedy","lines":[2],"transit":"Kennedy Station | Line 2 – Bloor–Danforth","year":1990,"yearNote":"1990 approx"},{"name":"Summerlea Park Co-op","slug":"summerlea-park-co-op","street":"16 Tandridge Crescent","muni":"Rexdale","postal":"M9W 2P1","address":"16 Tandridge Crescent Rexdale, ON M9W 2P1","email":"summerleapark@gmail.com","units":105,"station":"Wilson","lines":[1],"transit":"Wilson Station Line 1 – Yonge–University","year":1967,"yearNote":"1967"},{"name":"Alexandra Park Co-op","slug":"alexandra-park-co-op","street":"25 Eden Place","muni":"Toronto","postal":"M5T 2V6","address":"25 Eden Place Toronto, ON M5T 2V6","email":"alexandraparkcoop@rogers.com","units":104,"station":"Bathurst","lines":[2],"transit":"Bathurst Station Line: TTC Line 2 Bloor–Danforth","year":1973,"yearNote":"1973"},{"name":"Neilson Creek Co-op","slug":"neilson-creek-co-op","street":"235 Manse Road","muni":"West Hill","postal":"M1E 4X7","address":"235 Manse Road West Hill, ON M1E 4X7","email":"neilsoncreek@bellnet.ca","units":104,"station":"Kennedy","lines":[2],"transit":"Kennedy Station Line 2 – Bloor–Danforth","year":1981,"yearNote":"1981"},{"name":"Terrace Co-op","slug":"terrace-co-op","street":"88 Mutual Street","muni":"Toronto","postal":"M5B 2N3","address":"88 Mutual Street Toronto, ON M5B 2N3","email":"terraceco-op@rogers.com","units":104,"station":"College","lines":[1],"transit":"College Station Line 1","year":1993,"yearNote":"1993"},{"name":"Stanley Knowles Co-op","slug":"stanley-knowles-co-op","street":"38 Orchard View Boulevard","muni":"Toronto","postal":"M4R 2G3","address":"38 Orchard View Boulevard Toronto, ON M4R 2G3","email":"skhcpropertymanager@stanleyknowles.com","units":103,"station":"Eglinton","lines":[1],"transit":"Eglinton Station Line 1","year":1983,"yearNote":"1983"},{"name":"Main-Gerrard Co-op","slug":"main-gerrard-co-op","street":"180 Main Street","muni":"Toronto","postal":"M4E 2W1","address":"180 Main Street Toronto, ON M4E 2W1","email":"membership@mgcoop.ca","units":102,"station":"Main Street","lines":[2],"transit":"Main Street Station Line 2","year":1974,"yearNote":"1974"},{"name":"Milliken Co-op","slug":"milliken-co-op","street":"10 Alton Towers Circle","muni":"Scarborough","postal":"M1V 5A1","address":"10 Alton Towers Circle Scarborough, ON M1V 5A1","email":"millikencoop@gmail.com","units":102,"station":"Scarborough Centre","lines":[3],"transit":"Scarborough Centre Line 3","year":1987,"yearNote":"1987"},{"name":"Perth Avenue Co-op","slug":"perth-avenue-co-op","street":"120 Perth Avenue","muni":"Toronto","postal":"M6P 4E1","address":"120 Perth Avenue Toronto, ON M6P 4E1","email":"perthcoop@rogers.com","units":102,"station":"Dundas West","lines":[2],"transit":"Dundas West Station Line 2","year":1987,"yearNote":"1987"},{"name":"Windward Co-op","slug":"windward-co-op","street":"34 Little Norway Crescent","muni":"Toronto","postal":"M5V 3A3","address":"34 Little Norway Crescent Toronto, ON M5V 3A3","email":"manager@windwardcoop.ca","units":101,"station":"Bathurst","lines":[2],"transit":"Bathurst Station Line 2","year":1987,"yearNote":"1987"}];
+const LINE_COLOR = {1:"#f2c500",2:"#009a45",3:"#7a99ad",4:"#a21a68",5:"#e6761a"};
+const LINE_NAME = {1:"Line 1 Yonge–University",2:"Line 2 Bloor–Danforth",3:"Line 3 Scarborough",4:"Line 4 Sheppard",5:"Line 5 Eglinton"};
+const TOTAL_UNITS = DATA.reduce((a,d)=>a+d.units,0);
+const MAX_UNITS = Math.max(...DATA.map(d=>d.units));
+const MUNIS = [...new Set(DATA.map(d=>d.muni))].sort();
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---- shortlist (saved in this browser only) ---- */
+let saved = new Set();
+try{ saved = new Set(JSON.parse(localStorage.getItem("cooprank.shortlist")||"[]")); }catch(e){}
+function toggleSaved(slug){
+  saved.has(slug) ? saved.delete(slug) : saved.add(slug);
+  try{ localStorage.setItem("cooprank.shortlist",JSON.stringify([...saved])); }catch(e){}
+}
+/* ---- theme ---- */
+const root = document.documentElement;
+try{ const t=localStorage.getItem("cooprank.theme"); if(t) root.setAttribute("data-theme",t);
+     else root.removeAttribute("data-theme"); }catch(e){}
+document.getElementById("theme").onclick = ()=>{
+  const dark = getComputedStyle(document.body).backgroundColor.match(/\d+/g).map(Number)[0] < 128;
+  const next = dark ? "light" : "dark";
+  root.setAttribute("data-theme",next);
+  try{ localStorage.setItem("cooprank.theme",next); }catch(e){}
+};
+
+/* ---- state ---- */
+const state = { sort:"units", dir:"desc", q:"", muni:"", line:0 };
+
+function initials(name){
+  const w = name.replace(/Co-?op(erative)?( Homes)?/i,"").trim().split(/[\s/]+/).filter(Boolean);
+  return ((w[0]||"C")[0] + (w[1]? w[1][0] : (w[0]||"C")[1]||"")).toUpperCase();
+}
+function badgeColor(d){ return LINE_COLOR[d.lines[0]] || "#7a99ad"; }
+function badge(d,cls){
+  const c = badgeColor(d);
+  const dark = d.lines[0]===1 ? "#1a1a1a" : "#fff";
+  return `<span class="badge ${cls||""}" style="background:${c};color:${dark}" aria-hidden="true">${initials(d.name)}</span>`;
+}
+function lineChips(lines){
+  return `<span class="lines">`+lines.map(n=>`<span class="lnum" title="${LINE_NAME[n]}" style="background:${LINE_COLOR[n]};color:${n===1?"#1a1a1a":"#fff"}">${n}</span>`).join("")+`</span>`;
+}
+
+/* ---- filtering + sorting ---- */
+function rows(){
+  let r = DATA.filter(d=>{
+    if(state.line && !d.lines.includes(state.line)) return false;
+    if(state.muni && d.muni!==state.muni) return false;
+    if(state.q){
+      const q = state.q.toLowerCase();
+      if(!(d.name+" "+d.address+" "+d.station+" "+d.muni).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  const dir = state.dir==="asc" ? 1 : -1;
+  const key = state.sort;
+  r.sort((a,b)=>{
+    let x=a[key], y=b[key];
+    if(key==="name"||key==="muni"||key==="station"){ return String(x).localeCompare(String(y))*dir; }
+    if(x==null) return 1; if(y==null) return -1;
+    return (x-y)*dir || a.name.localeCompare(b.name);
+  });
+  return r;
+}
+
+function table(list,{ranked=true}={}){
+  if(!list.length) return `<div class="tablewrap"><div class="empty">No co-ops match those filters. Clear the search box or pick another line.</div></div>`;
+  const th = (key,label,cls="")=>{
+    const active = state.sort===key;
+    const arrow = active ? (state.dir==="asc"?"▲":"▼") : "▼";
+    return `<th class="${cls}" data-sort="${key}" ${active?`aria-sort="${state.dir==="asc"?"ascending":"descending"}"`:""}>${label}<span class="arrow">${arrow}</span></th>`;
+  };
+  return `<div class="tablewrap"><table>
+  <thead><tr>
+    <th class="nosort" aria-label="Shortlist"></th>
+    <th class="nosort rank">#</th>
+    ${th("name","Co-op")}
+    ${th("units","Homes","num")}
+    ${th("station","Nearest station","hide-sm")}
+    <th class="nosort hide-sm">Line</th>
+    ${th("year","Built","num hide-sm")}
+    ${th("muni","Area","hide-sm")}
+  </tr></thead><tbody>
+  ${list.map((d,i)=>`<tr data-go="${d.slug}">
+    <td class="star"><button class="starbtn" data-star="${d.slug}" aria-pressed="${saved.has(d.slug)}" aria-label="Save ${esc(d.name)} to your shortlist">${saved.has(d.slug)?"★":"☆"}</button></td>
+    <td class="rank">${ranked?i+1:""}</td>
+    <td><span class="coopcell">${badge(d)}<span><a class="nm" href="#/coop/${d.slug}">${esc(d.name)}</a><span class="sub">${esc(d.street)}</span></span></span></td>
+    <td class="num"><b>${d.units.toLocaleString()}</b><div class="bar" aria-hidden="true"><i style="width:${Math.max(3,d.units/MAX_UNITS*100)}%"></i></div></td>
+    <td class="hide-sm">${esc(d.station)}</td>
+    <td class="hide-sm">${lineChips(d.lines)}</td>
+    <td class="num hide-sm">${esc(d.yearNote)}</td>
+    <td class="hide-sm">${esc(d.muni)}</td>
+  </tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+/* ---- pages ---- */
+function home(){
+  const list = rows();
+  const pills = [
+    ["units","desc","Homes"],["year","desc","Newest"],["year","asc","Oldest"],
+    ["name","asc","Name A–Z"],["muni","asc","Area"]
+  ].map(([s,d,l])=>`<button class="pill" data-rank="${s}:${d}" aria-pressed="${state.sort===s&&state.dir===d}">${l}</button>`).join("");
+  return `
+  <div class="pagehead">
+    <h1>Toronto Co-op Comparison</h1>
+    <p class="tally"><b>${DATA.length}</b> co-ops · <b>${TOTAL_UNITS.toLocaleString()}</b> homes · every listing within walking or transit distance of a subway station</p>
+  </div>
+  <div class="rankby"><span class="lbl">Rank by</span>${pills}</div>
+  <div class="filters">
+    <span class="field"><input id="q" type="search" placeholder="Search co-op, street or station" value="${esc(state.q)}"></span>
+    <span class="field" style="flex:0 1 180px"><select id="muni">
+      <option value="">All areas</option>
+      ${MUNIS.map(m=>`<option ${state.muni===m?"selected":""}>${m}</option>`).join("")}
+    </select></span>
+    <span class="linefilter">
+      ${[1,2,3,4,5].map(n=>`<button class="lchip" data-line="${n}" aria-pressed="${state.line===n}"><span class="dot" style="background:${LINE_COLOR[n]}"></span>Line ${n}</button>`).join("")}
+    </span>
+  </div>
+  ${table(list)}`;
+}
+
+function shortlist(){
+  const list = DATA.filter(d=>saved.has(d.slug));
+  return `<div class="pagehead"><h1>Your shortlist</h1>
+    <p class="tally">${list.length ? `<b>${list.length}</b> co-op${list.length>1?"s":""} saved in this browser` : "Nothing saved yet."}</p></div>
+    ${list.length ? table(list,{ranked:false})
+      : `<div class="prose"><p>Tap the star beside any co-op to keep it here while you work through the list. The shortlist lives in this browser only, so it will not follow you to another device.</p><p><a href="#/">Back to the rankings</a></p></div>`}`;
+}
+
+function detail(slug){
+  const d = DATA.find(x=>x.slug===slug);
+  if(!d) return `<div class="pagehead"><h1>Not found</h1><p class="prose">That co-op is not in the directory. <a href="#/">See all ${DATA.length} co-ops</a>.</p></div>`;
+  const rank = [...DATA].sort((a,b)=>b.units-a.units).findIndex(x=>x.slug===slug)+1;
+  const near = DATA.filter(x=>x.station===d.station && x.slug!==d.slug);
+  const age = d.year ? (new Date().getFullYear()-d.year) : null;
+  return `
+  <a class="back" href="#/">← All co-ops</a>
+  <div class="detailhead">
+    ${badge(d)}
+    <div>
+      <h1 style="margin-bottom:2px">${esc(d.name)}</h1>
+      <p class="tally" style="margin:0">${esc(d.street)}, ${esc(d.muni)} ${esc(d.postal)}</p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="k">Homes</div><div class="v">${d.units.toLocaleString()}</div></div>
+    <div class="stat"><div class="k">Rank by size</div><div class="v">#${rank} <small>of ${DATA.length}</small></div></div>
+    <div class="stat"><div class="k">Built</div><div class="v">${esc(d.yearNote)}${age?` <small>${age} yrs</small>`:""}</div></div>
+    <div class="stat"><div class="k">Subway</div><div class="v" style="display:flex;align-items:center;gap:8px;font-size:16px">${lineChips(d.lines)} ${esc(d.station)}</div></div>
+  </div>
+  <dl class="facts">
+    <div><dt>Full address</dt><dd>${esc(d.address)}</dd></div>
+    <div><dt>Nearest station</dt><dd>${esc(d.station)} Station — ${d.lines.map(n=>LINE_NAME[n]).join(", ")||"see notes"}</dd></div>
+    <div><dt>Office email</dt><dd>${d.email?`<a href="mailto:${esc(d.email)}">${esc(d.email)}</a>`:"Not published"}</dd></div>
+    <div><dt>Share of all homes listed</dt><dd>${(d.units/TOTAL_UNITS*100).toFixed(1)}% of the ${TOTAL_UNITS.toLocaleString()} homes in this directory</dd></div>
+    <div><dt>Source note on transit</dt><dd>${esc(d.transit)}</dd></div>
+  </dl>
+  <h2>Applying here</h2>
+  <div class="prose">
+    <p>Co-ops keep their own waiting lists and open them on their own schedule. Email the office above to ask whether the list is open, which unit sizes it covers, and whether any subsidised units are included. CoopRank cannot pass an application along.</p>
+  </div>
+  ${near.length?`<h2>Also near ${esc(d.station)}</h2><div class="nearby">${near.map(n=>`<a href="#/coop/${n.slug}">${esc(n.name)} · ${n.units}</a>`).join("")}</div>`:""}
+  <p style="margin-top:26px"><button class="pill" data-star="${d.slug}" aria-pressed="${saved.has(d.slug)}" style="border:1px solid var(--rule)">${saved.has(d.slug)?"★ Saved to shortlist":"☆ Save to shortlist"}</button></p>`;
+}
+
+function about(){
+  const oldest = [...DATA].filter(d=>d.year).sort((a,b)=>a.year-b.year)[0];
+  const rowsM = [
+    ["Transit access","0.20","Walking distance to the nearest subway or rapid transit stop. Shorter walk scores higher.","partial","Station recorded for all 66; walking distance not yet measured."],
+    ["Affordability","0.25","Average housing charge by unit size. Lower charge scores higher.","pending","Charges are set per co-op and not published in one place."],
+    ["Grocery access","0.10","Walking distance to a full grocery store.","pending",""],
+    ["Gym access","0.05","Walking distance to a gym or community recreation centre.","pending",""],
+    ["Pool access","0.05","Walking distance to a public or on-site pool.","pending",""],
+    ["Vacancy","0.10","Units available or waiting-list status. More openings score higher.","pending","Changes week to week; needs a live feed from each office."],
+    ["Elevators and step-free access","0.10","Elevators relative to the number of homes.","pending",""],
+    ["Building condition and age","0.10","Newer construction scores higher, with credit for well-maintained older stock.","live","Year built recorded for 64 of 66."],
+    ["Housing choice","0.05","Range of unit sizes offered.","pending",""]
+  ];
+  return `
+  <div class="pagehead"><h1>About CoopRank</h1></div>
+  <div class="prose">
+    <p>A housing co-operative is a building owned by the people who live in it. Members pay a monthly housing charge rather than rent to a landlord, elect the board from among themselves, and take part in running the place. Co-ops are not-for-profit, so charges usually sit below market rent, and many hold subsidised units for households with lower incomes.</p>
+    <p>Finding one is the hard part. Each co-op runs its own office, its own waiting list and its own website, and there is no single place to compare them. CoopRank gathers ${DATA.length} co-ops across Toronto and the surrounding region into one sortable table, the way a market data site lists companies, so you can see the whole field at once and work out which offices are worth an email.</p>
+  </div>
+
+  <h2>What is in the directory</h2>
+  <div class="prose">
+    <p>Every listing carries six fields: co-op name, street address, office email, number of homes, nearest subway station, and year of construction. Together they cover ${TOTAL_UNITS.toLocaleString()} homes, from the largest at ${MAX_UNITS.toLocaleString()} units down to just over 100. The oldest building dates to ${oldest?esc(oldest.yearNote):"the 1890s"}; the newest went up in the late 1990s and 2000s.</p>
+    <p>The default ranking is by number of homes. Size is the one measure recorded for every co-op, and a larger co-op turns over more units in a year, which matters when you are watching for an opening.</p>
+  </div>
+
+  <h2>Scoring method</h2>
+  <div class="prose">
+    <p>The long-term plan is a single weighted score per co-op across nine measures. The weights below are fixed; what is missing is the data behind most of them. Rather than guess, the table shows only the fields actually collected, and each measure is marked with what it would need.</p>
+  </div>
+  <div class="tablewrap" style="padding:2px 6px">
+  <table class="method"><thead><tr><th>Measure</th><th>Weight</th><th>How it scores</th><th>Status</th></tr></thead><tbody>
+  ${rowsM.map(([m,w,h,st,note])=>`<tr>
+    <td><b>${m}</b>${note?`<div style="color:var(--ink-2);font-size:13px;margin-top:3px">${note}</div>`:""}</td>
+    <td class="num">${w}</td><td>${h}</td>
+    <td><span class="tag ${st==="live"?"live":""}">${st==="live"?"Collected":st==="partial"?"Partly collected":"Not yet collected"}</span></td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="note"><b>No composite score is shown yet.</b> Publishing one now would mean inventing values for affordability, vacancy and amenities, which are the fields most likely to decide where someone applies. The score goes live when those are measured, not before.</div>
+
+  <h2>Where the data comes from</h2>
+  <div class="prose">
+    <p>Listings were compiled from public co-op websites, published directories and co-op office contact pages, then normalised into one spreadsheet. Two entries have no confirmed year of construction and one is recorded only as the 1950s; these are shown as given rather than filled in.</p>
+    <p>Details change. Offices move, emails are retired, waiting lists open and close. Treat the address and email as a starting point and confirm with the co-op before acting on anything here.</p>
+  </div>
+
+  <h2>What CoopRank does not do</h2>
+  <div class="prose">
+    <ul>
+      <li>It does not take applications or forward them. Every co-op handles its own.</li>
+      <li>It does not hold waiting-list positions or know how long any list is.</li>
+      <li>It is not affiliated with any co-op, housing federation or government body.</li>
+      <li>It does not list housing charges, because they are not published consistently.</li>
+    </ul>
+    <p>Something wrong or missing? See the <a href="#/faq">FAQ</a> for how corrections are handled.</p>
+  </div>`;
+}
+
+function faq(){
+  const qs = [
+    ["What exactly is a housing co-op?",
+     `<p>A non-profit corporation that owns a building and houses its own members. You buy a small membership share, pay a monthly housing charge, and get a vote in how the co-op is run. There is no landlord and no owner taking a profit, so charges tend to track the cost of running the building.</p>`],
+    ["Is a co-op cheaper than renting?",
+     `<p>Usually, though not always, and the gap varies by building. Housing charges cover operating costs, mortgage payments and reserves rather than profit, which keeps them below market rent in most of the city. Some co-ops also hold units with rent-geared-to-income subsidy, where the charge is set as a share of household income. Charges are set per co-op and are not published in one place, which is why this site does not list them.</p>`],
+    ["How do I apply?",
+     `<p>Contact the co-op office directly using the email on its page here. Ask whether the waiting list is open, which unit sizes it covers, whether subsidised units are included, and what the application costs. Each co-op runs its own list on its own schedule; applying to one does nothing for the others.</p>`],
+    ["How long are the waiting lists?",
+     `<p>Often years, sometimes closed entirely. This site cannot tell you where a list stands, because that changes constantly and is not published. The practical approach is to apply to several co-ops that fit your needs rather than waiting on one.</p>`],
+    ["Why is the list ranked by number of homes?",
+     `<p>Because it is the only measure recorded for every co-op. It is also useful on its own: a larger co-op has more units turning over in a year, so it comes up more often. You can re-rank by year built, name or area using the buttons above the table, and sort any column by clicking its heading.</p>`],
+    ["Why is there no overall score?",
+     `<p>The scoring method is set out on the <a href="#/about">About</a> page with its nine measures and weights, but most of those measures have no data behind them yet. A score built on the two fields that do exist would look authoritative and mean very little. It will appear once affordability, vacancy and amenity data are collected.</p>`],
+    ["What counts as the nearest station?",
+     `<p>The subway or rapid transit station recorded for that co-op in the source data, with its line. Distances are not yet measured, so a station listed here is the closest one, not necessarily a short walk. A few listings sit well outside the subway network and name the station they would connect through.</p>`],
+    ["Does this cover every co-op in the region?",
+     `<p>No. It covers ${DATA.length} co-ops, weighted toward larger buildings near transit. Smaller co-ops, scattered-house co-ops and those outside the area are not here yet.</p>`],
+    ["My co-op's details are wrong. How do I fix them?",
+     `<p>Corrections from co-op offices take priority over anything on this site. Send the corrected field, the correct value, and a link or address that confirms it, and the listing is updated on the next revision. The same applies to a co-op that wants to be added or removed.</p>`],
+    ["Is my shortlist private?",
+     `<p>Yes. Starred co-ops are stored in your own browser and never leave it. Clearing your browser data clears the shortlist, and it will not appear on another device.</p>`]
+  ];
+  return `<div class="pagehead"><h1>Questions about co-ops and this list</h1>
+    <p class="tally">Ten things worth knowing before you email an office.</p></div>
+    <div style="max-width:76ch">${qs.map(([q,a],i)=>`<details class="faq" ${i===0?"open":""}><summary>${q}</summary><div class="body">${a}</div></details>`).join("")}</div>
+    <div class="prose"><p style="margin-top:24px">Still stuck? The <a href="#/about">About</a> page covers where the data comes from and what it leaves out.</p></div>`;
+}
+
+/* ---- router ---- */
+function render(){
+  const hash = location.hash.slice(1) || "/";
+  const [path,query] = hash.split("?");
+  if(query){
+    const p = new URLSearchParams(query);
+    if(p.get("sort")) state.sort = p.get("sort");
+    if(p.get("dir")) state.dir = p.get("dir");
+  }
+  const parts = path.split("/").filter(Boolean);
+  let html, route="home";
+  if(parts[0]==="coop"){ html = detail(parts[1]); route="home"; }
+  else if(parts[0]==="about"){ html = about(); route="about"; }
+  else if(parts[0]==="faq"){ html = faq(); route="faq"; }
+  else if(parts[0]==="shortlist"){ html = shortlist(); route="shortlist"; }
+  else html = home();
+  document.getElementById("app").innerHTML = html;
+  document.querySelectorAll("nav.main a").forEach(a=>{
+    a.dataset.route===route ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current");
+  });
+  document.title = parts[0]==="coop"
+    ? (DATA.find(d=>d.slug===parts[1])?.name || "Co-op") + " — CoopRank"
+    : route==="about" ? "About CoopRank" : route==="faq" ? "FAQ — CoopRank"
+    : route==="shortlist" ? "Your shortlist — CoopRank" : "Toronto Co-op Comparison — CoopRank";
+  window.scrollTo({top:0, left:0, behavior:"instant"});
+}
+
+document.addEventListener("click",e=>{
+  const star = e.target.closest("[data-star]");
+  if(star){ e.preventDefault(); e.stopPropagation(); toggleSaved(star.dataset.star); render(); return; }
+  const pill = e.target.closest("[data-rank]");
+  if(pill){ const [s,d]=pill.dataset.rank.split(":"); state.sort=s; state.dir=d; render(); return; }
+  const chip = e.target.closest("[data-line]");
+  if(chip){ const n=+chip.dataset.line; state.line = state.line===n?0:n; render(); return; }
+  const th = e.target.closest("th[data-sort]");
+  if(th){
+    const k = th.dataset.sort;
+    if(state.sort===k) state.dir = state.dir==="asc"?"desc":"asc";
+    else { state.sort=k; state.dir = (k==="name"||k==="muni"||k==="station")?"asc":"desc"; }
+    render(); return;
+  }
+  const tr = e.target.closest("tr[data-go]");
+  if(tr && !e.target.closest("a")){ location.hash = "#/coop/"+tr.dataset.go; }
+});
+document.addEventListener("input",e=>{
+  if(e.target.id==="q"){ state.q=e.target.value; const pos=e.target.selectionStart; render();
+    const el=document.getElementById("q"); if(el){el.focus(); el.setSelectionRange(pos,pos);} }
+});
+document.addEventListener("change",e=>{
+  if(e.target.id==="muni"){ state.muni=e.target.value; render(); }
+});
+window.addEventListener("hashchange",render);
+render();
+</script>
+</body>
+</html>
